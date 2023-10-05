@@ -11,3 +11,7 @@
 html {
   -webkit-font-smoothing: antialiased;
 }
+
+body {
+  font-family: "inter", sans-serif;
+}
