@@ -10,6 +10,9 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    screens: {
+      mobile: "320px",
+    },
     colors: {
       theme: {
         dark: "#212B50",
