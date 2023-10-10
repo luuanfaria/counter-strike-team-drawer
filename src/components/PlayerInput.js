@@ -1,45 +1,64 @@
-"use client";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { PlayerContext } from "../app/page";
 
-export default function PlayerInput({ addPlayer, playerId }) {
-  const [player, setPlayer] = useState({
-    id: playerId,
-    name: "",
-    level: 0,
-  });
+export default function PlayerInput({ playerId }) {
+  const { players, setPlayers, isCleared, setIsCleared } =
+    useContext(PlayerContext);
 
-  const handleLevelChange = (e) => {
-    const updatedPlayer = { ...player, level: e.target.value };
-    setPlayer(updatedPlayer);
-    if (updatedPlayer.level !== 0 && updatedPlayer.name !== "") {
-      addPlayer(updatedPlayer);
+  const [playerName, setPlayerName] = useState("");
+  const [playerLevel, setPlayerLevel] = useState(1);
+
+  useEffect(() => {
+    if (playerName && playerLevel) {
+      const playerExists = players.find((player) => player.id === playerId);
+
+      if (playerExists) {
+        setPlayers((prevPlayers) =>
+          prevPlayers.map((player) =>
+            player.id === playerId
+              ? { id: playerId, name: playerName, level: playerLevel }
+              : player,
+          ),
+        );
+      } else {
+        setPlayers((prevPlayers) => [
+          ...prevPlayers,
+          { id: playerId, name: playerName, level: playerLevel },
+        ]);
+      }
     }
+  }, [playerName, playerLevel, playerId]);
+
+  useEffect(() => {
+    if (isCleared) {
+      clearPlayer();
+      setIsCleared(false);
+    }
+  }, [isCleared]);
+
+  const clearPlayer = () => {
+    setPlayerName("");
+    setPlayerLevel(1);
   };
 
-  const handlePlayerNameChange = (e) => {
-    const updatedPlayer = { ...player, name: e.target.value };
-    setPlayer(updatedPlayer);
-    if (updatedPlayer.level !== 0 && updatedPlayer.name !== "") {
-      addPlayer(updatedPlayer);
-    }
+  const handlePlayerNameChange = (event) => {
+    const newName = event.target.value;
+    setPlayerName(newName);
   };
 
-  const handleClearPlayer = () => {
-    setPlayer((prevState) => ({
-      ...prevState,
-      id: playerId,
-      name: "",
-      level: 0,
-    }));
+  const handleLevelChange = (event) => {
+    const newLevel = Number(event.target.value);
+    setPlayerLevel(newLevel);
   };
 
   return (
     <div className="flex items-center gap-5 text-theme-light">
       <input
-        className="placeholder:italic placeholder:text-theme-light placeholder:text-opacity-80 block w-full border border-theme-mid rounded-md py-2 px-3 shadow-sm bg-theme-darkest focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm"
+        className="placeholder:italic placeholder:text-theme-light placeholder:text-opacity-80 placeholder:text-sm block w-full border border-theme-mid rounded-md py-2 px-3 shadow-sm bg-theme-darkest focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm"
         placeholder="Insira o nome do jogador"
         type="text"
         name="nickname"
+        value={playerName}
         onChange={handlePlayerNameChange}
       />
 
@@ -50,7 +69,7 @@ export default function PlayerInput({ addPlayer, playerId }) {
           name="level"
           max={5}
           min={1}
-          defaultValue="none"
+          value={playerLevel}
           onChange={handleLevelChange}
         >
           <option value="none" disabled hidden>
